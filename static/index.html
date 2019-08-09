@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"></script>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="jumbotron">
+            <h1>Pizza vs Hamburgers</h1>
+        </div>
+
+        <div id="not-yet-voted">
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <img class="card-img-top" src="/img/burger.jpg" alt="star shaped burger">
+                        <div class="card-body">
+                            <h5 class="card-title">TEAM BURGER</h5>
+                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            <a href="#" id="burger" class="btn btn-primary">Vote for Burger</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="card">
+                        <img class="card-img-top" src="/img/pizza.jpg" alt="heart shaped pizza">
+                        <div class="card-body">
+                            <h5 class="card-title">TEAM PIZZA</h5>
+                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                            <a href="#" id="pizza" class="btn btn-primary">Vote for Pizza</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="voted" style="display:none;">
+
+                <div style="width:500px;height:500px;">
+                    <canvas id="pie" width="400" height="400"></canvas>
+                </div>
+                
+
+        </div>
+
+
+    </div>
+
+    <script>
+        $(document).ready(function (){
+
+
+            const socket = io();
+            const ctx = document.getElementById("pie").getContext('2d');
+            const chartdata = {
+                datasets: [{
+                    data: [1, 1],
+                    backgroundColor: [
+                        'red',
+                        'yellow'
+                    ]
+                }],
+                labels: [
+                    'Burger',
+                    'Pizza'
+                ]
+            };
+
+            if(window.localStorage.voted){
+                $('#voted').css('display', 'block');
+                $('#not-yet-voted').css('display', 'none');
+            }
+
+            let myPieChart = new Chart(ctx,{
+                type: 'pie',
+                data: chartdata
+            });
+
+            $('#burger').click( (e) => {
+                // vote for burger
+                e.preventDefault();
+                if(!window.localStorage.voted){
+                    socket.emit('vote', {choice: 'burger'});
+                }
+                $('#voted').css('display', 'block');
+                $('#not-yet-voted').css('display', 'none');
+                window.localStorage.voted = true;
+            });
+
+            $('#pizza').click( (e) => {
+                // vote for pizza
+                e.preventDefault();
+                if(!window.localStorage.voted){
+                    socket.emit('vote', {choice: 'pizza'});
+                }
+                $('#voted').css('display', 'block');
+                $('#not-yet-voted').css('display', 'none');
+                window.localStorage.voted = true;
+            });
+
+            socket.on('results', data => {
+                console.log(data);
+                chartdata.datasets[0].data = [data.burger, data.pizza];
+                myPieChart = new Chart(ctx,{
+                    type: 'pie',
+                    data: chartdata
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
