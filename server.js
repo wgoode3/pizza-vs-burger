@@ -16,14 +16,13 @@ const votes = {
 
 io.on('connection', (socket) => {
 
-    console.log(socket.id);
+    // console.log(socket.id);
 
     socket.on('c', data => {
-        console.log(data);
+        socket.emit('connection', votes);
     });
 
     socket.on('vote', data => {
-        console.log(data);
         votes[data.choice]++;
         io.emit('results', votes);
     });

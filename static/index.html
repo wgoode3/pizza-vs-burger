@@ -11,14 +11,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"></script>
 </head>
 <body>
-    
     <div class="container">
         <div class="jumbotron">
             <h1>Pizza vs Hamburgers</h1>
         </div>
 
         <div id="not-yet-voted">
-
             <div class="row">
                 <div class="col-sm-6">
                     <div class="card">
@@ -30,7 +28,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="col-sm-6">
                     <div class="card">
                         <img class="card-img-top" src="/img/pizza.jpg" alt="heart shaped pizza">
@@ -45,21 +42,15 @@
         </div>
 
         <div id="voted" style="display:none;">
-
-                <div style="width:500px;height:500px;">
-                    <canvas id="pie" width="400" height="400"></canvas>
-                </div>
-                
-
+            <div style="width:500px;height:500px;">
+                <canvas id="pie" width="400" height="400"></canvas>
+            </div>
         </div>
-
 
     </div>
 
     <script>
         $(document).ready(function (){
-
-
             const socket = io();
             const ctx = document.getElementById("pie").getContext('2d');
             const chartdata = {
@@ -75,6 +66,13 @@
                     'Pizza'
                 ]
             };
+
+            socket.emit('c', {msg: 'connecting...'});
+
+            socket.on('connection', data => {
+                console.log(data);
+                chartdata.datasets[0].data = [data.burger, data.pizza];
+            });
 
             if(window.localStorage.voted){
                 $('#voted').css('display', 'block');
@@ -116,7 +114,6 @@
                     data: chartdata
                 });
             });
-
         });
     </script>
 </body>
